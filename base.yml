@@ -1,0 +1,10 @@
+---
+# Base playbook (intended post-hardening)
+
+- hosts: base
+  become: true
+  roles:
+    - role: base
+      tags: base_role
+    - role: iptables
+      tags: iptables_role

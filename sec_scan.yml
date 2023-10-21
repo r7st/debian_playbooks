@@ -1,0 +1,44 @@
+---
+# Use debsecan to scan for CVEs/vulns on Debian
+
+- hosts: all
+  tasks:
+
+    - name: Confirm this is Debian
+      ansible.builtin.assert:
+        that: ansible_distribution == "Debian"
+        msg: "This only works for Debian!"
+
+    - name: Define valid formats
+      ansible.builtin.set_fact:
+        valid_format: ["bugs", "packages", "summary", 
+                       "detail", "report", "simple"]
+
+    - name: Set format (default report if unset)
+      ansible.builtin.set_fact:
+        format: "{{ format | default('report') }}"
+
+    - name: Confirm format is valid
+      ansible.builtin.assert:
+        that: format in valid_format
+        msg: "Please input a valid format.."
+
+    - name: Install debsecan
+      ansible.builtin.apt:
+        name: debsecan
+        state: latest
+        update_cache: true
+
+    - name: Run scan
+      ansible.builtin.shell:
+        cmd: debsecan --suite $RELEASE --only-fixed --format $FORMAT
+      environment:
+        RELEASE: "{{ ansible_facts.lsb.codename }}"
+        FORMAT: "{{ format }}"
+      register: scan_res
+      changed_when: false
+      failed_when: scan_res.rc != 0
+
+    - name: Detected vulnerabilities
+      ansible.builtin.debug:
+        msg: "{{ scan_res.stdout | split('\n') }}"
