@@ -54,6 +54,13 @@
         ansible.builtin.debug:
           msg: "{{ needrestart_out.stdout | split('\n') }}"
 
+      - name: Reboot on deferred
+        ansible.builtin.debug:
+          msg: "Rebooting for deferred service restarts"
+        notify: Reboot
+        changed_when: true
+        when: "'deferred:' in needrestart_out.stdout"
+
   - name: Trigger reboot if needed
     ansible.builtin.debug:
       msg: "Rebooting if required"
