@@ -4,7 +4,7 @@
 - hosts: base
   become: true
   roles:
-    - role: base
+    - role: debian_base
       tags: base_role
-    - role: iptables
+    - role: debian_iptables
       tags: iptables_role
