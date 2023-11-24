@@ -6,5 +6,5 @@
   roles:
     - role: debian_base
       tags: base_role
-    - role: debian_iptables
-      tags: iptables_role
+    - role: debian_nftables
+      tags: nftables_role
