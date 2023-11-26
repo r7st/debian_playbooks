@@ -1,0 +1,45 @@
+---
+- hosts: all
+  tasks:
+  - name: Install wireguard
+    ansible.builtin.apt:
+      name: wireguard
+      state: latest
+      update_cache: true
+
+  - name: Create rt_table conf
+    ansible.builtin.lineinfile:
+      path: /etc/iproute2/rt_tables.d/wireguard.conf
+      line: "{{ item }}"
+      state: present
+      create: true
+      owner: root
+      group: root
+      mode: "0400"
+    with_items: "{{ wireguard_rt_tables }}"
+    when: 
+      - wireguard_rt_tables is defined
+      - wireguard_rt_tables | length > 0
+
+  - name: Copy wireguard conf
+    when:
+      - wireguard_conf is defined
+      - wireguard_conf | length > 0
+    block:
+    - name: Copy wireguard conf
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "/etc/wireguard/{{ item | basename }}.conf"
+        owner: root
+        group: root
+        mode: "0400"
+      with_items: "{{ wireguard_conf }}"
+      register: conf_updated
+
+    - name: Start and enable tunnels
+      ansible.builtin.systemd:
+        name: "wg-quick@{{ item | basename }}"
+        state: started
+        enabled: true
+      with_items: "{{ wireguard_conf }}"
+      when: conf_updated.changed
