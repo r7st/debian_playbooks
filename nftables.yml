@@ -1,0 +1,9 @@
+---
+# Base playbook (intended post-hardening)
+
+- hosts: all
+  become: true
+  roles:
+    - role: debian_nftables
+      when: _nftables_role | bool
+      tags: nftables_role
