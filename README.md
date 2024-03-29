@@ -1,5 +1,7 @@
 I add `roles_path=./roles` to ansible.cfg and use something like the following:
 ```
+- import_playbook: debian_playbooks/prerun.yml
+
 - import_playbook: debian_playbooks/devsec_hardening.yml
   vars:
     os_harden: "{{ devsec_os_harden | default('false') }}"
