@@ -17,7 +17,7 @@
       group: root
       mode: "0400"
     with_items: "{{ wireguard_rt_tables }}"
-    when: 
+    when:
       - wireguard_rt_tables is defined
       - wireguard_rt_tables | length > 0
 

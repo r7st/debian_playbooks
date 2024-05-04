@@ -11,7 +11,7 @@
 
     - name: Define valid formats
       ansible.builtin.set_fact:
-        valid_format: ["bugs", "packages", "summary", 
+        valid_format: ["bugs", "packages", "summary",
                        "detail", "report", "simple"]
 
     - name: Set format (default report if unset)

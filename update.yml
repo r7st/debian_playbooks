@@ -28,11 +28,13 @@
       owner: root
       group: root
       mode: 0644
+      # yamllint disable rule:line-length
       content: |
         # set autorestart default on noninteractive mode
         $nrconf{restart} = exists($ENV{DEBIAN_FRONTEND}) && $ENV{DEBIAN_FRONTEND} eq 'noninteractive' ? 'a' : 'i';
         # drop output to stdout/err
         $nrconf{ui} = 'NeedRestart::UI::stdio';
+      # yamllint enable rule:line-length
 
   - name: Check for reboot-required file
     ansible.builtin.stat:
