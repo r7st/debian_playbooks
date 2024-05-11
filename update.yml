@@ -2,22 +2,24 @@
 # Update Debian family hosts
 # Restart services/reboot as needed
 
-- hosts: all
+- name: Update Debian hosts
+  hosts: all
   become: true
   tasks:
 
-  - name: Confirm Debian family
+  - name: Check host Debian
     ansible.builtin.assert:
       that: ansible_facts['os_family'] == "Debian"
+      quiet: true
 
-  - name: Update all packages
+  - name: Update all packages  # noqa package-latest
     ansible.builtin.apt:
       name: "*"
       state: latest
       update_cache: true
       autoremove: true
 
-  - name: Install needrestart
+  - name: Install needrestart  # noqa package-latest
     ansible.builtin.apt:
       name: needrestart
       state: latest
@@ -27,7 +29,7 @@
       dest: /etc/needrestart/conf.d/restart.conf
       owner: root
       group: root
-      mode: 0644
+      mode: "0644"
       # yamllint disable rule:line-length
       content: |
         # set autorestart default on noninteractive mode
@@ -40,34 +42,28 @@
     ansible.builtin.stat:
       path: /var/run/reboot-required
     register: reboot_required
+    changed_when: reboot_required.stat.exists
+    notify: Reboot
 
   - name: Restart services as necessary
     # don't bother if rebooting anyway
     when: not reboot_required.stat.exists
     block:
-      - name: Run needrestart
+      - name: Run needrestart, reboot for deferred
         ansible.builtin.command:
           cmd: /usr/sbin/needrestart -f noninteractive
         register: needrestart_out
-        changed_when: false
+        changed_when: "'deferred:' in needrestart_out.stdout"
         failed_when: needrestart_out.rc != 0
+        notify: Reboot
 
       - name: Display needrestart output
         ansible.builtin.debug:
           msg: "{{ needrestart_out.stdout | split('\n') }}"
+        when: update_verbose | default(false)
 
-      - name: Reboot on deferred
-        ansible.builtin.debug:
-          msg: "Rebooting for deferred service restarts"
-        notify: Reboot
-        changed_when: true
-        when: "'deferred:' in needrestart_out.stdout"
-
-  - name: Trigger reboot if needed
-    ansible.builtin.debug:
-      msg: "Rebooting if required"
-    changed_when: reboot_required.stat.exists
-    notify: Reboot
+  - name: Flush handlers
+    ansible.builtin.meta: flush_handlers
 
   handlers:
   - name: Reboot
