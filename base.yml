@@ -1,7 +1,8 @@
 ---
 # Base playbook (intended post-hardening)
 
-- hosts: all
+- name: Base configuration
+  hosts: all
   become: true
   roles:
     - role: debian_base

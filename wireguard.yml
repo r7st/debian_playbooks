@@ -1,10 +1,11 @@
 ---
-- hosts: all
+- name: Wireguard configuration
+  hosts: all
   tasks:
   - name: Install wireguard
     ansible.builtin.apt:
       name: wireguard
-      state: latest
+      state: present
       update_cache: true
 
   - name: Create rt_table conf
@@ -36,7 +37,7 @@
       with_items: "{{ wireguard_conf }}"
       register: conf_updated
 
-    - name: Start and enable tunnels
+    - name: Start and enable tunnels  # noqa no-handler
       ansible.builtin.systemd:
         name: "wg-quick@{{ item | basename }}"
         state: started

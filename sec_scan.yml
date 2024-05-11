@@ -1,7 +1,7 @@
 ---
 # Use debsecan to scan for CVEs/vulns on Debian
-
-- hosts: all
+- name: Run debsecan on Debian hosts
+  hosts: all
   tasks:
 
     - name: Confirm this is Debian
@@ -26,7 +26,7 @@
     - name: Install debsecan
       ansible.builtin.apt:
         name: debsecan
-        state: latest
+        state: present
         update_cache: true
 
     - name: Run scan
